@@ -14,6 +14,9 @@ def removeNonAlphaNumericalCharacters(strToClean):
     return re.sub("\"|u|\[|\'|\]", lambda s: "", str(strToClean))
 
 
+def binarize(age):
+    return int((age > 30))
+
 mat = scipy.io.loadmat('input/wiki_meta_data.mat')
 
 dateOfBirths = mat['wiki']['dob'][0][0][0]
@@ -28,7 +31,7 @@ wikiData = pd.DataFrame(data={
     'date_of_photo_shoot': dateOfPhotoShoot,
 
     'file_path': filePath,
-    'face_score': faceScore
+
 })
 
 wikiData['file_path'] = wikiData['file_path'].apply(removeNonAlphaNumericalCharacters)
@@ -39,6 +42,9 @@ wikiData['age'] = wikiData['date_of_photo_shoot'] - wikiData['date_of_birth'].ap
 wikiData.replace([np.inf, -np.inf], np.nan)
 wikiData.replace(np.inf, np.nan)
 
+wikiData = wikiData.drop('date_of_birth', 1)
+wikiData = wikiData.drop('date_of_photo_shoot', 1)
+wikiData['label'] = wikiData['age'].apply(binarize)
 cleanData = wikiData.replace([np.inf, -np.inf], np.nan).dropna()
 
 cleanData.to_csv('output/cleaned.csv')
